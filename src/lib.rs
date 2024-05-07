@@ -338,7 +338,7 @@ pub mod header {
 
 /// Reexport of reqwest Proxy
 pub mod proxy {
-    pub use reqwest::proxy::*;
+    pub use reqwest::Proxy;
 }
 
 pub(crate) mod api_default_imports {
