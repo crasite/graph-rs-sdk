@@ -336,6 +336,11 @@ pub mod header {
     pub use reqwest::header::*;
 }
 
+/// Reexport of reqwest Proxy
+pub mod proxy {
+    pub use reqwest::proxy::*;
+}
+
 pub(crate) mod api_default_imports {
     pub(crate) use handlebars::*;
     pub use reqwest::Method;

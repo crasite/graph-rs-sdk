@@ -5,6 +5,7 @@ use graph_error::GraphResult;
 use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, USER_AGENT};
 use reqwest::redirect::Policy;
 use reqwest::tls::Version;
+use reqwest::Proxy;
 use std::env::VarError;
 use std::ffi::OsStr;
 use std::fmt::{Debug, Formatter};
@@ -18,6 +19,7 @@ struct ClientConfiguration {
     referer: bool,
     timeout: Option<Duration>,
     connect_timeout: Option<Duration>,
+    proxy: Option<Proxy>,
     connection_verbose: bool,
     https_only: bool,
     /// TLS 1.2 required to support all features in Microsoft Graph
@@ -36,6 +38,7 @@ impl ClientConfiguration {
             referer: true,
             timeout: None,
             connect_timeout: None,
+            proxy: None,
             connection_verbose: false,
             https_only: true,
             min_tls_version: Version::TLS_1_2,
@@ -112,6 +115,14 @@ impl GraphClientConfiguration {
         self
     }
 
+    /// Set a proxy for the client
+    ///
+    /// Default is `None`.
+    pub fn proxy(mut self, proxy: Proxy) -> GraphClientConfiguration {
+        self.config.proxy = Some(proxy);
+        self
+    }
+
     /// Set whether connections should emit verbose logs.
     ///
     /// Enabling this option will emit [log][] messages at the `TRACE` level
@@ -158,6 +169,10 @@ impl GraphClientConfiguration {
             builder = builder.connect_timeout(connect_timeout);
         }
 
+        if let Some(proxy) = self.config.proxy {
+            builder = builder.proxy(proxy);
+        }
+
         Client {
             access_token: self.config.access_token.unwrap_or_default(),
             inner: builder.build().unwrap(),
@@ -182,6 +197,10 @@ impl GraphClientConfiguration {
 
         if let Some(connect_timeout) = self.config.connect_timeout {
             builder = builder.connect_timeout(connect_timeout);
+        }
+
+        if let Some(proxy) = self.config.proxy {
+            builder = builder.proxy(proxy);
         }
 
         BlockingClient {
